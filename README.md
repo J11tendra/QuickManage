@@ -8,11 +8,11 @@ Desktop app for managing expenses
 
 #### Option to change the expense
 
-![Option to change the expense](mock-ups/mock-up-01.png)
+![Option to change the expense](mock-ups/mock-up-02.png)
 
 #### Edit the expense
 
-![Edit the expense](mock-ups/mock-up-01.png)
+![Edit the expense](mock-ups/mock-up-03.png)
 
 ## Features
 
