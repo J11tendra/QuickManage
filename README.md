@@ -2,13 +2,16 @@
 
 Desktop app for managing expenses
 
-**Add the expense**
+#### Add the expense
+
 ![Add the expense](mock-ups/mock-up-01.png)
 
-**Option to change the expense**
+#### Option to change the expense
+
 ![Option to change the expense](mock-ups/mock-up-01.png)
 
-**Edit the expense**
+#### Edit the expense
+
 ![Edit the expense](mock-ups/mock-up-01.png)
 
 ## Features
