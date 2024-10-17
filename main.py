@@ -4,7 +4,7 @@ from ttkbootstrap import Style
 from tkinter import ttk
 import sqlite3
 from os.path import exists
-
+import matplotlib.pyplot as plt  # Importing matplotlib for plotting
 
 class ExpenseTracker(tk.Tk):
     def __init__(self):
@@ -165,6 +165,17 @@ class ExpenseTracker(tk.Tk):
         self.button_add_expense.grid(row=3, columnspan=2, pady=10)
         self.button_add_expense.config(cursor="hand2")
 
+        # Visualization Button
+        self.button_visualize_expenses = ttk.Button(
+            self,
+            text="Visualize Expenses",
+            bootstyle="info",
+            command=self.visualize_expenses,
+            style="info.TButton",
+        )
+        self.button_visualize_expenses.grid(row=4, columnspan=2, pady=10)
+        self.button_visualize_expenses.config(cursor="hand2")
+
         # Treeview for displaying expenses
         self.tree_expenses = ttk.Treeview(
             self, columns=("Date", "Category", "Amount"), show="headings", height=10
@@ -175,7 +186,7 @@ class ExpenseTracker(tk.Tk):
         self.tree_expenses.column("Date", width=100)
         self.tree_expenses.column("Category", width=150)
         self.tree_expenses.column("Amount", width=100)
-        self.tree_expenses.grid(row=4, columnspan=2, padx=10, pady=20)
+        self.tree_expenses.grid(row=5, columnspan=2, padx=10, pady=20)
         self.tree_expenses.bind("<Button-1>", self.on_treeview_click)
 
         # Total Expenses Label (Teal for highlighting totals)
@@ -185,13 +196,31 @@ class ExpenseTracker(tk.Tk):
             font=("Helvetica", 14),
             foreground="#4ECCA3",
         )
-        self.label_total.grid(row=5, columnspan=2, pady=10)
+        self.label_total.grid(row=6, columnspan=2, pady=10)
 
         # Context menu for deleting and editing expenses
         self.create_context_menu()
 
         # Update the expenses in the UI
         self.update_expenses()
+
+    def visualize_expenses(self):
+        # Group expenses by category for plotting
+        category_totals = {}
+        for expense in self.expenses:
+            category = expense[1]
+            amount = float(expense[2])
+            category_totals[category] = category_totals.get(category, 0) + amount
+
+        categories = list(category_totals.keys())
+        amounts = list(category_totals.values())
+
+        # Create a pie chart or bar chart (you can choose which one you prefer)
+        plt.figure(figsize=(6, 6))
+        plt.pie(amounts, labels=categories, autopct="%1.1f%%", startangle=90)
+        plt.title("Expenses by Category")
+        plt.axis("equal")  # Equal aspect ratio ensures the pie is drawn as a circle.
+        plt.show()
 
     def add_expense(self):
         date = self.entry_date.get()
@@ -208,33 +237,37 @@ class ExpenseTracker(tk.Tk):
         else:
             messagebox.showwarning("Warning", "Please enter all fields.")
 
+    def on_treeview_click(self, event):
+        pass  # You can implement this if you need row-specific actions
+
     def update_expenses(self):
-        self.tree_expenses.delete(*self.tree_expenses.get_children())
+        # Clear the treeview
+        for item in self.tree_expenses.get_children():
+            self.tree_expenses.delete(item)
+
+        # Add all expenses to the treeview
         total = 0
         for expense in self.expenses:
-            amount = expense[2]
+            self.tree_expenses.insert("", tk.END, values=expense)
+            total += float(expense[2])
 
-            # Convert to float if necessary
-            if isinstance(amount, str):
-                amount = float(amount.replace(",", "."))
-
-            self.tree_expenses.insert("", "end", values=expense)
-            total += float(amount)
-
+        # Update the total label
         self.label_total.config(text=f"Total Expenses: ${total:.2f}")
 
     def create_context_menu(self):
         self.context_menu = tk.Menu(self, tearoff=0)
-        self.context_menu.add_command(label="Delete", command=self.delete_expense)
-        self.context_menu.add_command(label="Edit", command=self.edit_expense)
-        self.tree_expenses.bind("<Button-3>", self.show_context_menu)
+        self.context_menu.add_command(
+            label="Edit Expense", command=self.edit_expense, foreground="#FFD700"
+        )
+        self.context_menu.add_command(
+            label="Delete Expense", command=self.delete_expense, foreground="#FF6347"
+        )
 
-    def show_context_menu(self, event):
-        self.context_menu.post(event.x_root, event.y_root)
-
-    def on_treeview_click(self, event):
-        if self.tree_expenses.identify_row(event.y):
-            self.tree_expenses.config(cursor="hand2")
+        # Bind right-click to show the context menu
+        self.tree_expenses.bind(
+            "<Button-3>",
+            lambda event: self.context_menu.post(event.x_root, event.y_root),
+        )
 
 
 if __name__ == "__main__":
